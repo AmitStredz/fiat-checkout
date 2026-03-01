@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './Success.css';
 
 const Success = () => {
@@ -11,6 +11,19 @@ const Success = () => {
   useEffect(() => {
     if (!txn) navigate('/', { replace: true });
   }, [txn, navigate]);
+
+  const [copied, setCopied] = useState(false);
+
+  const truncateId = (id) => {
+    if (id.length <= 12) return id;
+    return `${id.slice(0, 5)}...${id.slice(-5)}`;
+  };
+
+  const handleCopy = async (text) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!txn) return null;
 
@@ -31,7 +44,24 @@ const Success = () => {
           {txn.transaction_Id && (
             <div className="success-row">
               <span className="success-label">Transaction ID</span>
-              <span className="success-value">{txn.transaction_Id}</span>
+              <span className="success-value txn-id-value">
+                {truncateId(txn.transaction_Id)}
+                <button
+                  className="copy-btn"
+                  onClick={() => handleCopy(txn.transaction_Id)}
+                  title="Copy full ID"
+                >
+                  {copied ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="14" height="14">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3a2.25 2.25 0 00-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                    </svg>
+                  )}
+                </button>
+              </span>
             </div>
           )}
           {txn.to && (
