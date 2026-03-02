@@ -219,6 +219,16 @@
   height: 20px;
 }
 
+.card-brand-icon {
+  pointer-events: none;
+}
+
+.card-brand svg {
+  width: 36px;
+  height: 24px;
+  border-radius: 3px;
+}
+
 .form-row {
   display: flex;
   gap: 16px;

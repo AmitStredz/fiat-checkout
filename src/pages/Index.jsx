@@ -5,6 +5,43 @@ import headphonesImg from '../assets/headphone.png';
 
 const PAYMENT_API = 'https://fiat-checkout2.free.beeceptor.com/api/payment';
 
+const detectCardType = (number) => {
+  const digits = number.replace(/\s/g, '');
+  if (!digits) return null;
+  if (/^4/.test(digits)) return 'visa';
+  if (/^5[1-5]/.test(digits) || /^2[2-7]/.test(digits)) return 'mastercard';
+  if (/^3[47]/.test(digits)) return 'amex';
+  if (/^6(?:011|5)/.test(digits)) return 'discover';
+  if (/^35(?:2[89]|[3-8])/.test(digits)) return 'jcb';
+  if (/^3(?:0[0-5]|[68])/.test(digits)) return 'diners';
+  if (/^62/.test(digits)) return 'unionpay';
+  return null;
+};
+
+const luhnCheck = (number) => {
+  const digits = number.replace(/\s/g, '');
+  if (!/^\d+$/.test(digits)) return false;
+  let sum = 0;
+  let alternate = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = parseInt(digits[i], 10);
+    if (alternate) { n *= 2; if (n > 9) n -= 9; }
+    sum += n;
+    alternate = !alternate;
+  }
+  return sum % 10 === 0;
+};
+
+const cardConfig = {
+  visa: { maxLength: 16, cvvLength: 3 },
+  mastercard: { maxLength: 16, cvvLength: 3 },
+  amex: { maxLength: 15, cvvLength: 4 },
+  discover: { maxLength: 16, cvvLength: 3 },
+  jcb: { maxLength: 16, cvvLength: 3 },
+  diners: { maxLength: 14, cvvLength: 3 },
+  unionpay: { maxLength: 19, cvvLength: 3 },
+};
+
 const validators = {
   cardholderName: (v) => {
     if (!v.trim()) return 'Cardholder name is required';
@@ -17,6 +54,7 @@ const validators = {
     if (!digits) return 'Card number is required';
     if (!/^\d+$/.test(digits)) return 'Card number must contain only digits';
     if (digits.length < 13 || digits.length > 19) return 'Card number must be 13–19 digits';
+    if (digits.length >= 13 && !luhnCheck(digits)) return 'Invalid card number';
     return '';
   },
   expiry: (v) => {
@@ -36,8 +74,14 @@ const validators = {
   },
 };
 
-const formatCardNumber = (value) => {
-  const digits = value.replace(/\D/g, '').slice(0, 16);
+const formatCardNumber = (value, cardType) => {
+  const max = cardType && cardConfig[cardType] ? cardConfig[cardType].maxLength : 16;
+  const digits = value.replace(/\D/g, '').slice(0, max);
+  if (cardType === 'amex') {
+    return digits.replace(/(\d{4})(\d{0,6})(\d{0,5})/, (_, a, b, c) =>
+      [a, b, c].filter(Boolean).join(' ')
+    );
+  }
   return digits.replace(/(.{4})/g, '$1 ').trim();
 };
 
@@ -62,11 +106,17 @@ const Index = () => {
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const cardType = detectCardType(form.cardNumber);
+  const cvvMax = cardType && cardConfig[cardType] ? cardConfig[cardType].cvvLength : 4;
+
   const handleChange = (field, raw) => {
     let value = raw;
-    if (field === 'cardNumber') value = formatCardNumber(raw);
+    if (field === 'cardNumber') {
+      const type = detectCardType(raw);
+      value = formatCardNumber(raw, type);
+    }
     if (field === 'expiry') value = formatExpiry(raw);
-    if (field === 'cvv') value = raw.replace(/\D/g, '').slice(0, 4);
+    if (field === 'cvv') value = raw.replace(/\D/g, '').slice(0, cvvMax);
 
     setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -193,17 +243,55 @@ const Index = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="0000 0000 0000 0000"
-                maxLength={19}
+                placeholder={cardType === 'amex' ? '0000 000000 00000' : '0000 0000 0000 0000'}
+                maxLength={cardType === 'amex' ? 17 : 19}
                 value={form.cardNumber}
                 onChange={(e) => handleChange('cardNumber', e.target.value)}
                 onBlur={() => handleBlur('cardNumber')}
                 disabled={loading}
               />
-              <span className="input-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
-                </svg>
+              <span className="input-icon card-brand-icon">
+                {cardType ? (
+                  <span className={`card-brand card-brand--${cardType}`}>
+                    {cardType === 'visa' && (
+                      <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="32" rx="4" fill="#1A1F71"/>
+                        <path d="M19.5 21H16.8L18.5 11H21.2L19.5 21ZM14.8 11L12.2 18L11.9 16.5L11 12C11 12 10.9 11 9.5 11H5.1L5 11.2C5 11.2 6.5 11.5 8.3 12.6L10.7 21H13.5L17.7 11H14.8ZM37.5 21H40L37.8 11H35.6C34.4 11 34.1 12 34.1 12L30 21H32.8L33.3 19.5H36.8L37.5 21ZM34.1 17.3L35.6 13.2L36.4 17.3H34.1ZM30 13.5L30.4 11.2C30.4 11.2 29 10.7 27.5 10.7C26 10.7 22.5 11.4 22.5 14.5C22.5 17.3 26.5 17.3 26.5 18.8C26.5 20.3 23 20 21.7 19L21.3 21.4C21.3 21.4 22.7 22 24.7 22C26.7 22 30 20.8 30 18C30 15.1 26 14.8 26 13.5C26 12.2 28.7 12.4 30 13.5Z" fill="white"/>
+                      </svg>
+                    )}
+                    {cardType === 'mastercard' && (
+                      <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="32" rx="4" fill="#252525"/>
+                        <circle cx="19" cy="16" r="8" fill="#EB001B"/>
+                        <circle cx="29" cy="16" r="8" fill="#F79E1B"/>
+                        <path d="M24 9.8a8 8 0 010 12.4 8 8 0 000-12.4z" fill="#FF5F00"/>
+                      </svg>
+                    )}
+                    {cardType === 'amex' && (
+                      <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="32" rx="4" fill="#2E77BC"/>
+                        <text x="24" y="20" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" fontFamily="sans-serif">AMEX</text>
+                      </svg>
+                    )}
+                    {cardType === 'discover' && (
+                      <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="32" rx="4" fill="#F6F6F6"/>
+                        <circle cx="28" cy="16" r="7" fill="#F47216"/>
+                        <text x="14" y="19" fill="#1A1A2E" fontSize="7" fontWeight="bold" fontFamily="sans-serif">D</text>
+                      </svg>
+                    )}
+                    {!['visa', 'mastercard', 'amex', 'discover'].includes(cardType) && (
+                      <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="32" rx="4" fill="#E2E8F0"/>
+                        <text x="24" y="19" textAnchor="middle" fill="#64748B" fontSize="7" fontWeight="600" fontFamily="sans-serif">{cardType.toUpperCase()}</text>
+                      </svg>
+                    )}
+                  </span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                  </svg>
+                )}
               </span>
             </div>
             {errors.cardNumber && touched.cardNumber && (
@@ -235,7 +323,7 @@ const Index = () => {
                   type="text"
                   className="form-input"
                   placeholder="123"
-                  maxLength={4}
+                  maxLength={cvvMax}
                   value={form.cvv}
                   onChange={(e) => handleChange('cvv', e.target.value)}
                   onBlur={() => handleBlur('cvv')}
