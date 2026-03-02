@@ -3,9 +3,9 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #e8eaf0;
+  background-color: #F6F6F8;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .success-container {
@@ -30,7 +30,6 @@
   }
 }
 
-/* Animated check circle */
 .success-icon {
   width: 72px;
   height: 72px;
@@ -64,22 +63,21 @@
 .success-heading {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #0F172A;
   margin: 0 0 8px;
 }
 
 .success-message {
   font-size: 15px;
-  color: #6b7280;
+  color: #64748B;
   margin: 0 0 28px;
 }
 
-/* Transaction details */
 .success-details {
-  background: #f9fafb;
+  background: #F8FAFC;
   border-radius: 14px;
   padding: 20px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   text-align: left;
 }
 
@@ -91,19 +89,19 @@
 }
 
 .success-row + .success-row {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #E2E8F0;
 }
 
 .success-label {
   font-size: 13px;
   font-weight: 600;
-  color: #6b7280;
+  color: #64748B;
 }
 
 .success-value {
   font-size: 13px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #0F172A;
   text-align: right;
   max-width: 60%;
   word-break: break-all;
@@ -146,20 +144,83 @@
   height: 14px;
 }
 
-/* Home button */
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.receipt-btn {
+  width: 100%;
+  padding: 14px;
+  background: #F8FAFC;
+  color: #334155;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.receipt-btn:hover {
+  background: #E2E8F0;
+  border-color: #CBD5E1;
+}
+
+.receipt-btn svg {
+  flex-shrink: 0;
+}
+
 .success-home-btn {
   width: 100%;
   padding: 16px;
-  background: #3b5bdb;
+  background: #135BEC;
   color: #fff;
   border: none;
   border-radius: 14px;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  box-shadow: 0px 4px 12px rgba(19, 91, 236, 0.2);
 }
 
 .success-home-btn:hover {
-  background: #2f4fc0;
+  background: #1150D4;
+}
+
+.countdown-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.countdown-bar {
+  width: 100%;
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.countdown-progress {
+  height: 100%;
+  background: #135BEC;
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.countdown-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94A3B8;
 }
