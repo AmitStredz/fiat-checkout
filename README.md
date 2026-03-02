@@ -4,7 +4,7 @@ A production-grade payment checkout page built with React and Vite. Features rea
 
 **Live behavior:** The mock API returns success or failure randomly (50/50), so the same card details may succeed or fail on different attempts.
 
-**Deployed Site Link:** https://fiat-checkout-amit.vercel.app/
+**Deployed Site Link:** https://fiat-checkout-amit.vercel.app
 **Figma Link:** [Figma](https://www.figma.com/design/uZbiHprmFW8KV4OjZE56tj/Untitled?node-id=0-1&t=0qlcaJDEuPfiIh3u-1)
 ## Tech Stack
 
