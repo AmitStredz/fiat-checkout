@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import './Success.css';
 import confetti from '../utils/confetti';
@@ -8,7 +8,17 @@ const REDIRECT_SECONDS = 15;
 const Success = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const txn = state?.transaction;
+  const [searchParams] = useSearchParams();
+
+  const urlTransactionId = searchParams.get('transactionId');
+  const stateTxn = state?.transaction;
+
+  const txn = stateTxn || (urlTransactionId ? {
+    transaction_Id: urlTransactionId,
+    message: 'Payment completed successfully.',
+    success: true,
+  } : null);
+
   const confettiCleanup = useRef(null);
 
   useEffect(() => {
