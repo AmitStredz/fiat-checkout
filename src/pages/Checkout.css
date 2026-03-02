@@ -20,6 +20,15 @@
   overflow: hidden;
 }
 
+@media (min-height: 800px) {
+  .checkout-container {
+    min-height: auto;
+    max-height: 780px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+}
+
 .checkout-header {
   display: flex;
   align-items: center;
@@ -70,7 +79,7 @@
 .checkout-main {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 120px;
+  padding-bottom: 16px;
 }
 
 .item-summary {
@@ -292,10 +301,8 @@
 }
 
 .pay-button-wrapper {
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
   padding: 16px 16px 32px;
@@ -305,6 +312,7 @@
   -webkit-backdrop-filter: blur(12px);
   z-index: 1;
   box-sizing: border-box;
+  margin-top: auto;
 }
 
 .pay-button {
