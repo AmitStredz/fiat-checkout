@@ -5,7 +5,7 @@ import headphonesImg from '../assets/headphone.png';
 import CardPreview from '../components/CardPreview';
 import useNetworkStatus from '../hooks/useNetworkStatus';
 
-const PAYMENT_API = 'https://fiat-checkout2.free.beeceptor.com/api/payment';
+const BEECEPTOR_DOMAIN = import.meta.env.VITE_BEECEPTOR_DOMAIN;
 const REQUEST_TIMEOUT = 30000;
 const SUBMIT_COOLDOWN = 3000;
 
@@ -227,7 +227,7 @@ const Index = () => {
     const timeoutId = setTimeout(() => abortRef.current?.abort(), REQUEST_TIMEOUT);
 
     try {
-      const res = await fetch(PAYMENT_API, {
+      const res = await fetch(`${BEECEPTOR_DOMAIN}/api/payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: abortRef.current.signal,
