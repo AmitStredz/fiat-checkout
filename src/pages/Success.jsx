@@ -1,7 +1,6 @@
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import './Success.css';
-import confetti from '../utils/confetti';
 
 const REDIRECT_SECONDS = 15;
 
@@ -19,28 +18,9 @@ const Success = () => {
     success: true,
   } : null);
 
-  const confettiCleanup = useRef(null);
-
   useEffect(() => {
     if (!txn) navigate('/', { replace: true });
   }, [txn, navigate]);
-
-  useEffect(() => {
-    if (txn) {
-      confettiCleanup.current = confetti({ particleCount: 150, origin: { x: 0.5, y: 0.35 } });
-      const timer = setTimeout(() => {
-        confettiCleanup.current = confetti({
-          particleCount: 80,
-          origin: { x: 0.3, y: 0.5 },
-          startVelocity: 30,
-        });
-      }, 600);
-      return () => {
-        clearTimeout(timer);
-        if (confettiCleanup.current) confettiCleanup.current();
-      };
-    }
-  }, [txn]);
 
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
